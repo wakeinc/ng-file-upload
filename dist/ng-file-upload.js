@@ -528,7 +528,7 @@ ngFileUpload.service('Upload', ['$http', '$q', '$timeout', function ($http, $q, 
 
     var leaveTimeout = null;
     var stopPropagation = $parse(attr.ngfStopPropagation);
-    var dragOverDelay = 50;
+    var dragOverDelay = attr.dragOverDelay || 50;
     var actualDragOverClass;
 
     elem[0].addEventListener('dragover', function (evt) {
@@ -556,14 +556,16 @@ ngFileUpload.service('Upload', ['$http', '$q', '$timeout', function ($http, $q, 
       leaveTimeout = $timeout(function () {
         elem.removeClass(actualDragOverClass);
         actualDragOverClass = null;
-      }, dragOverDelay || 100);
+      }, dragOverDelay);
     }, false);
     elem[0].addEventListener('drop', function (evt) {
       if (elem.attr('disabled') || disabled) return;
       evt.preventDefault();
       if (stopPropagation(scope)) evt.stopPropagation();
-      elem.removeClass(actualDragOverClass);
-      actualDragOverClass = null;
+      $timeout(function() {
+        elem.removeClass(actualDragOverClass);
+        actualDragOverClass = null;
+      }, dragOverDelay);
       extractFiles(evt, function (files, rejFiles) {
         updateModel($parse, $timeout, scope, ngModel, attr,
           attr.ngfChange || attr.ngfDrop, files, rejFiles, evt);
